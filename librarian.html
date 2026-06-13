@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>BookHive Librarian Dashboard</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
+}
+
+body{
+    background:#eef2f7;
+}
+
+/* HEADER */
+
+.header{
+    background:#1f2a44;
+    color:#fff;
+    padding:15px 25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:4px solid #c9a227;
+}
+
+.logo h1{
+    font-size:24px;
+}
+
+.logo p{
+    opacity:.8;
+}
+
+.loans-btn.active{
+    background:#ffffff;
+    color:#1f2a44;
+    border:2px solid #c9a227;
+    box-shadow:0 0 10px rgba(201,162,39,.5);
+}
+
+.header-actions{
+    display:flex;
+    gap:10px;
+}
+.loans-btn.active{
+    background:#ffffff;
+    color:#1f2a44;
+    border:2px solid #c9a227;
+    box-shadow:0 0 10px rgba(201,162,39,.5);
+}
+
+.btn{
+    padding:10px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.loans-btn{
+    background:#c9a227;
+    color:#fff;
+}
+
+
+.logout-btn{
+    background:#e74c3c;
+    color:white;
+}
+
+/* MAIN */
+
+main{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+
+/* DASHBOARD */
+
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.stat-card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+.stat-card span{
+    font-size:28px;
+    font-weight:bold;
+    color:#1f2a44;
+}
+
+/* FORM */
+
+.panel{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+    margin-bottom:20px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:10px;
+}
+
+.form-grid input{
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+.add-btn{
+    background:#27ae60;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:12px;
+    cursor:pointer;
+}
+
+/* BOOKS */
+
+#books{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:20px;
+}
+
+.book-card{
+    background:white;
+    border-radius:12px;
+    padding:18px;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+.book-card h3{
+    color:#1f2a44;
+}
+
+.book-card p{
+    margin:8px 0;
+}
+
+.card-actions{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+}
+
+.edit-btn{
+    flex:1;
+    background:#3498db;
+    color:white;
+    border:none;
+    padding:10px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.delete-btn{
+    flex:1;
+    background:#e74c3c;
+    color:white;
+    border:none;
+    padding:10px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.6);
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+.modal-content{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    width:320px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.modal-content input{
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+.close{
+    cursor:pointer;
+    font-size:20px;
+    text-align:right;
+}
+
+</style>
+</head>
+<body>
+
+<header class="header">
+
+    <div class="logo">
+        <h1>BookHive Librarian</h1>
+        <div id="userInfo" style="margin-top:5px;font-weight:bold;"></div>
+    </div>
+
+    <div class="header-actions">
+
+        <button class="btn loans-btn">
+            Manage Books
+        </button>
+
+        <button class="btn loans-btn"
+        onclick="window.location.href='loan_transactions.html'">
+            Loan Transactions
+        </button>
+
+        <button class="btn loans-btn" onclick="logout()">
+            Logout
+        </button>
+
+    </div>
+
+</header>
+
+<main>
+
+<div class="dashboard">
+
+    <div class="stat-card">
+        <h3>Total Books</h3>
+        <span id="totalBooks">0</span>
+    </div>
+
+</div>
+
+<div class="panel">
+
+    <h2>Add New Book</h2>
+
+    <br>
+
+    <form class="form-grid" onsubmit="submitBook(event)">
+
+    <input id="title" placeholder="Title" autocomplete="off" required>
+
+    <input id="author" placeholder="Author" autocomplete="off" required>
+
+    <input id="category" placeholder="Category" autocomplete="off" required>
+
+    <input id="copies" type="number" placeholder="Copies" autocomplete="off" required>
+
+    <button class="add-btn" id="submitBtn" type="submit">
+        Add Book
+    </button>
+
+    </form>
+
+</div>
+
+<div id="books"></div>
+
+</main>
+
+<!-- EDIT MODAL -->
+<div id="editModal" class="modal" onclick="outsideClick(event)">
+
+    <div class="modal-content" onclick="event.stopPropagation()">
+
+        <span class="close" onclick="closeModal()">&times;</span>
+
+        <h2>Edit Book</h2>
+
+        <input id="editTitle" placeholder="Title" required>
+        <input id="editAuthor" placeholder="Author" required>
+        <input id="editCategory" placeholder="Category" required>
+        <input id="editCopies" type="number" placeholder="Copies" required>
+
+        <button class="add-btn" onclick="updateBook()">
+            Update Book
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+let allBooks = [];
+let editId = null;
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!user || user.role !== "librarian") {
+    window.location.href = "login.html";
+}
+
+document.getElementById("userInfo").innerText =
+    "Logged in as: " + user.name + " (" + user.role + ")";
+
+// LOAD BOOKS
+fetch("../api/books.php")
+.then(res => res.json())
+.then(data => {
+
+    allBooks = data;
+
+    document.getElementById("totalBooks").innerText = data.length;
+
+    renderBooks(data);
+
+});
+
+// RENDER BOOKS
+function renderBooks(books){
+
+    const container = document.getElementById("books");
+    container.innerHTML = "";
+
+    books.forEach(book => {
+
+        const card = document.createElement("div");
+        card.className = "book-card";
+
+        card.innerHTML = `
+
+            <h3>${book.title}</h3>
+
+            <p><strong>Author:</strong> ${book.author}</p>
+
+            <p><strong>Category:</strong> ${book.category}</p>
+
+            <p><strong>Available:</strong> ${book.available_copies}</p>
+
+            <div class="card-actions">
+
+                <button class="edit-btn" onclick="editBook(${book.id})">
+                    Edit
+                </button>
+
+                <button class="delete-btn" onclick="deleteBook(${book.id})">
+                    Delete
+                </button>
+
+            </div>
+
+        `;
+
+        container.appendChild(card);
+
+    });
+
+}
+
+// ADD OR UPDATE BOOK (ONE FUNCTION ONLY)
+function submitBook(event){
+
+    event.preventDefault(); // IMPORTANT
+
+    const title = document.getElementById("title").value.trim();
+    const author = document.getElementById("author").value.trim();
+    const category = document.getElementById("category").value.trim();
+    const copies = document.getElementById("copies").value;
+
+    // extra safety check (important)
+    if(!title || !author || !category || !copies){
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    const data = {
+        title,
+        author,
+        category,
+        total_copies: copies,
+        available_copies: copies
+    };
+
+    if(editId === null){
+
+        fetch("../api/books.php", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(res => {
+            alert(res.message || res.error);
+            location.reload();
+        });
+
+    } else {
+
+        fetch(`../api/books.php?id=${editId}`, {
+            method: "PUT",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(res => {
+            alert(res.message || res.error);
+
+            editId = null;
+            document.getElementById("submitBtn").innerText = "Add Book";
+
+            location.reload();
+        });
+    }
+}
+
+// EDIT (NO PROMPT ANYMORE)
+
+function editBook(id){
+
+    const book = allBooks.find(b => b.id == id);
+
+    editId = id;
+
+    document.getElementById("editTitle").value = book.title;
+    document.getElementById("editAuthor").value = book.author;
+    document.getElementById("editCategory").value = book.category;
+    document.getElementById("editCopies").value = book.available_copies;
+
+    document.getElementById("editModal").style.display = "flex";
+}
+
+function updateBook(){
+
+    const data = {
+        title: document.getElementById("editTitle").value,
+        author: document.getElementById("editAuthor").value,
+        category: document.getElementById("editCategory").value,
+        total_copies: document.getElementById("editCopies").value,
+        available_copies: document.getElementById("editCopies").value
+    };
+
+    fetch(`../api/books.php?id=${editId}`, {
+        method: "PUT",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(res => {
+        alert(res.message || res.error);
+
+        closeModal();   // ✅ CLOSE HERE
+
+        location.reload();
+    });
+}
+
+// DELETE
+function deleteBook(id){
+
+    if(!confirm("Delete this book?")) return;
+
+    fetch(`../api/books.php?id=${id}`, {
+        method: "DELETE"
+    })
+
+    .then(res => res.text())
+    .then(() => {
+        alert("Book deleted");
+        location.reload();
+    });
+
+}
+
+function closeModal(){
+    document.getElementById("editModal").style.display = "none";
+    editId = null;
+}
+
+// click outside modal closes it
+function outsideClick(event){
+    document.getElementById("editModal").style.display = "none";
+    editId = null;
+}
+
+// LOGOUT
+function logout(){
+
+    localStorage.clear();
+    window.location.href = "login.html";
+}
+
+</script>
+
+</body>
+</html>

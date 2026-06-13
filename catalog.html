@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>BookHive Library System</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
+}
+
+body{
+    background:#eef2f7;
+    min-height:100vh;
+}
+
+/* HEADER */
+
+.header{
+    background:#1f2a44;
+    color:#fff;
+    padding:15px 25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:4px solid #c9a227;
+}
+
+.logo h1{
+    font-size:24px;
+}
+
+.logo p{
+    opacity:.8;
+}
+
+.loans-btn.active{
+    background:#ffffff;
+    color:#1f2a44;
+    border:2px solid #c9a227;
+    box-shadow:0 0 10px rgba(201,162,39,.5);
+}
+
+.header-actions{
+    display:flex;
+    gap:10px;
+}
+.loans-btn.active{
+    background:#ffffff;
+    color:#1f2a44;
+    border:2px solid #c9a227;
+    box-shadow:0 0 10px rgba(201,162,39,.5);
+}
+
+.btn{
+    padding:10px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.loans-btn{
+    background:#c9a227;
+    color:#fff;
+}
+
+.history-btn{
+    background:#3498db;
+    color:white;
+}
+
+.logout-btn{
+    background:#e74c3c;
+    color:white;
+}
+
+/* MAIN */
+
+main{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+
+/* DASHBOARD */
+
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.stat-card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+.stat-card h3{
+    color:#666;
+}
+
+.stat-card span{
+    font-size:28px;
+    font-weight:bold;
+    color:#1f2a44;
+}
+
+/* SEARCH PANEL */
+
+.search-panel{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+    margin-bottom:20px;
+}
+
+.search-panel h2{
+    margin-bottom:15px;
+    color:#1f2a44;
+}
+
+.search-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.search-row input,
+.search-row select{
+    flex:1;
+    min-width:250px;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+/* BOOKS */
+
+#books{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:20px;
+}
+
+.book-card{
+    background:white;
+    border-radius:12px;
+    padding:18px;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+    transition:.3s;
+}
+
+.book-card:hover{
+    transform:translateY(-4px);
+}
+
+.book-card h3{
+    color:#1f2a44;
+    margin-bottom:10px;
+}
+
+.book-card p{
+    margin:8px 0;
+}
+
+.borrow-btn{
+    width:100%;
+    margin-top:12px;
+    padding:10px;
+    background:#c9a227;
+    border:none;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+/* MODAL */
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.6);
+}
+
+.modal-content{
+    background:white;
+    width:90%;
+    max-width:700px;
+    margin:50px auto;
+    border-radius:12px;
+    padding:20px;
+}
+
+.close{
+    float:right;
+    cursor:pointer;
+    font-size:30px;
+}
+
+.history-item{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+}
+
+/* FOOTER */
+
+footer{
+    background:#1f2a44;
+    color:white;
+    text-align:center;
+    padding:15px;
+    margin-top:30px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header class="header">
+
+    <div class="logo">
+        <h1>BookHive Library System</h1>
+        <div id="userInfo" style="color:white; font-weight:bold;"></div>
+
+    </div>
+
+    <div class="header-actions">
+
+
+    <a href="catalog.html">
+        <button id="nav-books" class="btn loans-btn">Books</button>
+    </a>
+
+    <a href="loans.html">
+        <button id="nav-loans" class="btn loans-btn">Loans</button>
+    </a>
+
+    <button class="btn logout-btn" onclick="logout()">
+        Logout
+    </button>
+
+</div>
+
+</header>
+
+<main>
+
+<div class="dashboard">
+
+    <div class="stat-card">
+        <h3>Total Books</h3>
+        <span id="totalBooks">0</span>
+    </div>
+
+    <div class="stat-card">
+        <h3>Categories</h3>
+        <span id="totalCategories">0</span>
+    </div>
+
+</div>
+
+<div class="search-panel">
+
+    <h2>Library Catalog</h2>
+
+    <div class="search-row">
+
+        <input
+            type="text"
+            id="search"
+            placeholder="Search title or author..."
+        >
+
+        <select id="categoryFilter">
+            <option value="all">All Categories</option>
+            <option value="Programming">Programming</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="Manga">Manga</option>
+        </select>
+
+    </div>
+
+</div>
+
+<div id="books"></div>
+
+</main>
+
+<footer>
+    © BookHive Library System
+</footer>
+
+<!-- HISTORY MODAL -->
+
+<div id="historyModal" class="modal">
+
+    <div class="modal-content">
+
+        <span class="close" onclick="closeHistory()">
+            &times;
+        </span>
+
+        <h2>Borrow History</h2>
+
+        <br>
+
+        <div id="historyList"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+let user = null;
+
+/* =========================
+   LOGIN CHECK (SAFE)
+========================= */
+try {
+    const stored = localStorage.getItem("user");
+    user = stored ? JSON.parse(stored) : null;
+} catch (e) {
+    user = null;
+}
+
+if (!user || !user.id) {
+    alert("You are not logged in!");
+    window.location.href = "login.html";
+}
+
+const displayName = user.name || user.full_name || "User";
+document.getElementById("userInfo").innerText =
+    `Logged in as: ${displayName} (${user.role || "member"})`;
+
+/* =========================
+   LOAD BOOKS
+========================= */
+let allBooks = [];
+
+fetch("../api/books.php")
+.then(res => res.json())
+.then(data => {
+
+    allBooks = data;
+
+    document.getElementById("totalBooks").innerText = data.length;
+
+    const categories = [...new Set(data.map(b => b.category))];
+    document.getElementById("totalCategories").innerText = categories.length;
+
+    renderBooks(data);
+})
+.catch(err => {
+    console.log(err);
+});
+
+/* =========================
+   RENDER BOOKS (FAST VERSION)
+========================= */
+function renderBooks(books) {
+
+    const container = document.getElementById("books");
+    container.innerHTML = "";
+
+    const html = books.map(book => `
+        <div class="book-card">
+            <h3>${book.title}</h3>
+            <p><strong>Author:</strong> ${book.author}</p>
+            <p><strong>Category:</strong> ${book.category}</p>
+            <p><strong>Available:</strong> ${book.available_copies}</p>
+
+            <button class="borrow-btn" data-id="${book.id}">
+                Borrow Book
+            </button>
+        </div>
+    `).join("");
+
+    container.innerHTML = html;
+}
+
+/* =========================
+   EVENT DELEGATION (FAST CLICK FIX)
+========================= */
+document.getElementById("books").addEventListener("click", function(e) {
+
+    if (e.target.classList.contains("borrow-btn")) {
+
+        const bookId = e.target.dataset.id;
+        borrowBook(bookId);
+    }
+});
+
+/* =========================
+   BORROW BOOK (FIXED)
+========================= */
+function borrowBook(bookId) {
+
+    fetch("../api/loans.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            book_id: bookId
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.message) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.error || "Borrow failed");
+        }
+
+    })
+    .catch(err => {
+        console.log(err);
+        alert("Borrow failed");
+    });
+}
+
+/* =========================
+   SEARCH + FILTER
+========================= */
+const searchInput = document.getElementById("search");
+const categoryFilter = document.getElementById("categoryFilter");
+
+function filterBooks() {
+
+    const search = searchInput.value.toLowerCase();
+    const category = categoryFilter.value;
+
+    const filtered = allBooks.filter(book => {
+
+        const matchSearch =
+            book.title.toLowerCase().includes(search) ||
+            book.author.toLowerCase().includes(search);
+
+        const matchCategory =
+            category === "all" || book.category === category;
+
+        return matchSearch && matchCategory;
+    });
+
+    renderBooks(filtered);
+}
+
+searchInput.addEventListener("input", filterBooks);
+categoryFilter.addEventListener("change", filterBooks);
+
+/* =========================
+   HISTORY (LOCAL ONLY)
+========================= */
+function openHistory() {
+
+    const history = JSON.parse(localStorage.getItem("borrowHistory")) || [];
+    const container = document.getElementById("historyList");
+
+    if (history.length === 0) {
+        container.innerHTML = "<p>No history found.</p>";
+    } else {
+        container.innerHTML = history.map(item => `
+            <div class="history-item">
+                <strong>${item.title}</strong><br>
+                Author: ${item.author}<br>
+                Borrowed: ${item.date}
+            </div>
+        `).join("");
+    }
+
+    document.getElementById("historyModal").style.display = "block";
+}
+
+function closeHistory() {
+    document.getElementById("historyModal").style.display = "none";
+}
+
+/* =========================
+   LOGOUT
+========================= */
+function logout() {
+
+    if (confirm("Are you sure you want to logout?")) {
+        localStorage.clear();
+        window.location.href = "login.html";
+    }
+}
+
+/* =========================
+   NAV ACTIVE BUTTON
+========================= */
+const currentPage = window.location.pathname.split("/").pop();
+
+if (currentPage === "catalog.html") {
+    document.getElementById("nav-books")?.classList.add("active");
+}
+if (currentPage === "loans.html") {
+    document.getElementById("nav-loans")?.classList.add("active");
+}
+if (currentPage === "history.html") {
+    document.getElementById("nav-history")?.classList.add("active");
+}
+
+</script>
+
+</body>
+</html>

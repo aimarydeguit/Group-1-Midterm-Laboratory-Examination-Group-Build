@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookHive Login</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f6fa;
+    color: #333;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+/* LOGIN BOX */
+.container {
+    width: 380px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border-top: 5px solid #c9a227;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* TITLE */
+h2 {
+    text-align: center;
+    color: #1f2a44;
+    margin-bottom: 15px;
+}
+
+/* ROLE TABS */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.tabs button {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    opacity: 0.6;
+}
+
+.tabs button.active {
+    opacity: 1;
+}
+
+.members {
+    background: #1f2a44;
+}
+
+.librarian {
+    background: #1f2a44;
+}
+
+/* INPUTS */
+label {
+    font-size: 12px;
+    color: #1f2a44;
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* BUTTON */
+.login-btn {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background: #1f2a44;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.login-btn:hover {
+    background: #2c3e5f;
+}
+
+/* REGISTER BUTTON */
+.register-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background: #c9a227;
+    color: #1f2a44;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.register-btn:hover {
+    background: #e0b93a;
+}
+
+/* ERROR */
+.error {
+    color: red;
+    font-size: 12px;
+    text-align: center;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>BookHive Login</h2>
+
+    <!-- ROLE SELECT -->
+    <div class="tabs">
+        <button type="button" class="members active" onclick="setRole('member')">
+            Member
+        </button>
+
+        <button type="button" class="librarian" onclick="setRole('librarian')">
+            Librarian
+        </button>
+    </div>
+
+    <!-- FORM -->
+    <form id="loginForm">
+
+        <label>Email</label>
+        <input type="email" id="email" placeholder="Enter Email">
+
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter Password">
+
+        <button type="submit" class="login-btn">
+            Login
+        </button>
+
+        <button type="button" class="register-btn" onclick="goRegister()">
+           Register Account
+        </button>
+
+        <div class="error" id="error"></div>
+
+    </form>
+
+</div>
+
+<script>
+
+let selectedRole = "member";
+
+/* SWITCH ROLE */
+function setRole(role) {
+
+    selectedRole = role;
+
+    document.querySelector(".members").classList.remove("active");
+    document.querySelector(".librarian").classList.remove("active");
+
+    if (role === "member") {
+        document.querySelector(".members").classList.add("active");
+    } else {
+        document.querySelector(".librarian").classList.add("active");
+    }
+}
+
+/* LOGIN */
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    document.getElementById("error").textContent = "";
+
+    fetch("../api/login.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            email: email,
+            password: password,
+            role: selectedRole
+        })
+    })
+
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.success) {
+
+            localStorage.setItem("user", JSON.stringify(data.user));
+
+            const role = data.user.role;
+
+            if (role === "librarian") {
+                window.location.href = "librarian.html";
+            } 
+            else if (role === "member") {
+                window.location.href = "catalog.html";
+            } 
+            else {
+                document.getElementById("error").textContent =
+                    "Unknown role";
+            }
+
+        } else {
+            document.getElementById("error").textContent = data.error;
+        }
+
+    })
+
+    .catch(err => {
+        document.getElementById("error").textContent = "Server error";
+    });
+
+});
+
+/* GO REGISTER */
+function goRegister() {
+    window.location.href = "register.html";
+}
+
+</script>
+
+</body>
+</html>

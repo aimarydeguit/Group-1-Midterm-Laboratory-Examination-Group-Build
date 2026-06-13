@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BookHive Register</title>
+
+<style>
+
+/* BASE */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f6fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* CARD */
+.container {
+    width: 380px;
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    border-top: 5px solid #c9a227;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* TITLE */
+h2 {
+    text-align: center;
+    color: #1f2a44;
+    margin-bottom: 15px;
+}
+
+/* INPUT */
+label {
+    display: block;
+    font-size: 12px;
+    color: #1f2a44;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* BUTTON */
+button {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* REGISTER BTN */
+.register-btn {
+    background: #1f2a44;
+    color: white;
+}
+
+.register-btn:hover {
+    background: #2c3e5f;
+}
+
+/* BACK TO LOGIN */
+.login-btn {
+    background: #c9a227;
+    color: #1f2a44;
+}
+
+.login-btn:hover {
+    background: #e0b93a;
+}
+
+/* ERROR */
+small {
+    color: red;
+    font-size: 11px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Create BookHive Account</h2>
+
+    <form id="registerForm">
+
+        <label>Full Name</label>
+        <input type="text" id="name">
+        <small id="nameError"></small>
+
+        <label>Email</label>
+        <input type="email" id="email">
+        <small id="emailError"></small>
+
+        <label>Password</label>
+        <input type="password" id="password">
+        <small id="passwordError"></small>
+
+        <button type="submit" class="register-btn">
+            Register
+        </button>
+
+        <button type="button" class="login-btn" onclick="goLogin()">
+            Back to Login
+        </button>
+
+    </form>
+
+</div>
+
+<script>
+
+document.getElementById("registerForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    let name = document.getElementById("name").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let password = document.getElementById("password").value.trim();
+
+    document.getElementById("nameError").textContent = "";
+    document.getElementById("emailError").textContent = "";
+    document.getElementById("passwordError").textContent = "";
+
+    let valid = true;
+
+    if(name === ""){
+        document.getElementById("nameError").textContent = "Name is required";
+        valid = false;
+    }
+
+    if(email === ""){
+        document.getElementById("emailError").textContent = "Email is required";
+        valid = false;
+    }
+
+    if(password.length < 6){
+        document.getElementById("passwordError").textContent =
+            "Password must be at least 6 characters";
+        valid = false;
+    }
+
+    if(!valid) return;
+
+    const response = await fetch("../api/register.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: name,
+            email: email,
+            password: password
+        })
+    });
+
+    const text = await response.text();
+    console.log("RAW RESPONSE:", text);
+
+    try {
+        const data = JSON.parse(text);
+
+        if(response.status === 201){
+            alert("Account created successfully!");
+           window.location.href = "login.html";
+        } else {
+            alert(data.error || "Registration failed");
+        }
+
+    } catch(e){
+        alert("Server error (not JSON). Check console.");
+        console.log(text);
+    }
+
+});
+
+/* BACK TO LOGIN */
+function goLogin(){
+    window.location.href = "login.html";
+}
+
+</script>
+
+</body>
+</html>
